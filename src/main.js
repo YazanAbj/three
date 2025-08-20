@@ -274,7 +274,7 @@ displayFolder.add(params, 'speed').name("Speed (m/s)").listen();
 displayFolder.add(params, 'altitude').name("Altitude (m)").listen();
 displayFolder.add(params, 'showForces').name("Show Forces");
 displayFolder.add(params, 'showTrail').name("Show Trail");
-displayFolder.add({ cameraMode: "overview" }, 'cameraMode', ["overview", "follow", "fixed", "free"]).name("Camera Mode").onChange((val) => {
+displayFolder.add({ cameraMode: "overview" }, 'cameraMode', ["overview", "follow", "fixed", "free","cockpit"]).name("Camera Mode").onChange((val) => {
   cameraMode = val;
 
 });
@@ -595,6 +595,30 @@ else if (cameraMode === "free") {
     camera.position.add(move);
   }
 }
+
+
+else if (cameraMode === "cockpit") {
+  // Position inside missile (slightly behind the nose)
+  const cockpitOffset = new THREE.Vector3(0, 1.2, 2); 
+  // ↑ tweak Y and Z to move camera slightly "inside"
+
+  // Transform offset into missile local space
+  cockpitOffset.applyQuaternion(missile.quaternion);
+
+  // Final camera position
+  const cockpitPosition = missile.position.clone().add(cockpitOffset);
+  camera.position.lerp(cockpitPosition, 0.2); // smooth
+
+  // Look straight ahead from the missile’s POV
+  const lookAtTarget = missile.position.clone().add(
+    new THREE.Vector3(0, 0, 20).applyQuaternion(missile.quaternion)
+  );
+
+  camera.lookAt(lookAtTarget);
+
+  controls.enabled = false;
+}
+
 
 
 
